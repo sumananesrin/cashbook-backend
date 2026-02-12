@@ -27,12 +27,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-eoni&hm00+n0p(0-qwa@b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', '1') == '1'
 
+# Default hosts (Local + Production)
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'cashbook-backend-3-1w6z.onrender.com']
+
 ALLOWED_HOSTS_ENV = os.environ.get('ALLOWED_HOSTS')
 if ALLOWED_HOSTS_ENV:
-    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
-else:
-    # Default to localhost for development
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+    # Append env vars, ignoring wildcards which might crash production if strict
+    for host in ALLOWED_HOSTS_ENV.split(','):
+        if host.strip() and host.strip() != '*':
+            ALLOWED_HOSTS.append(host.strip())
 
 
 
@@ -180,27 +183,35 @@ SIMPLE_JWT = {
 
 # CORS Settings
 # If CORS_ALLOWED_ORIGINS_ENV is set, split it by comma, else use list
+# CORS Settings
+# Default allowed origins (Local + Production Frontend)
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://cashbook-frontend-sable.vercel.app'
+]
+
 CORS_ALLOWED_ORIGINS_ENV = os.environ.get('CORS_ALLOWED_ORIGINS')
 if CORS_ALLOWED_ORIGINS_ENV:
-    # Ensure no wildcards '*' are used in production and whitespace is stripped
-    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_ENV.split(',')]
-else:
-    CORS_ALLOWED_ORIGINS = [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-    ]
+    for origin in CORS_ALLOWED_ORIGINS_ENV.split(','):
+        if origin.strip() and origin.strip() != '*':
+             CORS_ALLOWED_ORIGINS.append(origin.strip())
 
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF Settings
 # Important for production when frontend is on a different domain
+# CSRF Settings
+# Default trusted origins (Local + Production Frontend)
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://cashbook-frontend-sable.vercel.app'
+]
+
 CSRF_TRUSTED_ORIGINS_ENV = os.environ.get('CSRF_TRUSTED_ORIGINS')
 if CSRF_TRUSTED_ORIGINS_ENV:
-    # Django 4.0+ requires schemes (http:// or https://)
-    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(',')]
-else:
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-    ]
+    for origin in CSRF_TRUSTED_ORIGINS_ENV.split(','):
+        if origin.strip() and origin.strip() != '*':
+             CSRF_TRUSTED_ORIGINS.append(origin.strip())
 
