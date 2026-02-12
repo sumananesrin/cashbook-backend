@@ -36,14 +36,26 @@ class CashbookViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Cashbook.objects.filter(business__owner=self.request.user)
+        # User can see cashbooks they own OR are a member of
+        return Cashbook.objects.filter(
+            Q(business__owner=self.request.user) | 
+            Q(business__members__user=self.request.user)
+        ).distinct()
 
     def perform_create(self, serializer):
-        # Ensure business belongs to user
-        business = serializer.validated_data['business']
-        if business.owner != self.request.user:
-            raise permissions.PermissionDenied("You do not own this business.")
-        serializer.save()
+        user = self.request.user
+        # Logic: Use existing business or create a new one
+        # If business_id is passed in context or params, better usage, but for now:
+        business = Business.objects.filter(owner=user).first()
+        
+        if not business:
+            # Create a default business for the user
+            business_name = f"{user.username}'s Business"
+            if hasattr(user, 'full_name') and user.full_name:
+                 business_name = f"{user.full_name}'s Business"
+            business = Business.objects.create(name=business_name, owner=user)
+            
+        serializer.save(business=business)
 
     @action(detail=True, methods=['patch'], url_path='set-default')
     def set_default(self, request, pk=None):

@@ -11,7 +11,7 @@ class CashbookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cashbook
         fields = '__all__'
-        read_only_fields = ('created_at',)
+        read_only_fields = ('created_at', 'business')
 
 class MemberSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
