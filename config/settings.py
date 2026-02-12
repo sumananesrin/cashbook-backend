@@ -29,9 +29,10 @@ DEBUG = os.environ.get('DEBUG', '1') == '1'
 
 ALLOWED_HOSTS_ENV = os.environ.get('ALLOWED_HOSTS')
 if ALLOWED_HOSTS_ENV:
-    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(',')
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
 else:
-    ALLOWED_HOSTS = ['*']
+    # Default to localhost for development
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 
@@ -181,7 +182,8 @@ SIMPLE_JWT = {
 # If CORS_ALLOWED_ORIGINS_ENV is set, split it by comma, else use list
 CORS_ALLOWED_ORIGINS_ENV = os.environ.get('CORS_ALLOWED_ORIGINS')
 if CORS_ALLOWED_ORIGINS_ENV:
-    CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS_ENV.split(',')
+    # Ensure no wildcards '*' are used in production and whitespace is stripped
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_ENV.split(',')]
 else:
     CORS_ALLOWED_ORIGINS = [
         'http://localhost:5173',
@@ -194,7 +196,8 @@ CORS_ALLOW_CREDENTIALS = True
 # Important for production when frontend is on a different domain
 CSRF_TRUSTED_ORIGINS_ENV = os.environ.get('CSRF_TRUSTED_ORIGINS')
 if CSRF_TRUSTED_ORIGINS_ENV:
-    CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS_ENV.split(',')
+    # Django 4.0+ requires schemes (http:// or https://)
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(',')]
 else:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:5173',
